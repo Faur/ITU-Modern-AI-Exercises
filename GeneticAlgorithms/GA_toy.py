@@ -5,7 +5,7 @@ class Gene():
         if isinstance(gene_seed, int):
             self.genome = np.random.binomial(1, 0.5, gene_seed)
         else:
-            self.genome = gene_seed
+            self.genome = np.copy(gene_seed)
 
         self.gene_size = len(self.genome)
 
