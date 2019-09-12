@@ -41,6 +41,7 @@ import util
 import time
 import search
 
+import copy
 import numpy as np
 class GoWestAgent(Agent):
     "An agent that goes West until it can't."
@@ -54,18 +55,13 @@ class GoWestAgent(Agent):
 
 import GA_util
 class GAAgent(Agent):
-    def __init__(self):
+    def __init__(self, genome=None):
         self.legal_composit = ["SEQ", "SEL"]
         self.legal_leaf = [
             "Go.North",
             "Go.East",
             "Go.South",
             "Go.West",
-            "Go.Random",
-            "GoNot.North",
-            "GoNot.East",
-            "GoNot.South",
-            "GoNot.West",
             "Valid.North",
             "Valid.East",
             "Valid.South",
@@ -74,23 +70,51 @@ class GAAgent(Agent):
             "Danger.East",
             "Danger.South",
             "Danger.West",
+            # "Go.Random",
+            # "GoNot.North",
+            # "GoNot.East",
+            # "GoNot.South",
+            # "GoNot.West",
         ]
         self.legal_decorator = ["Invert"]
         self.legal_nodes = self.legal_composit + self.legal_leaf + self.legal_decorator
 
-        self.genome = ["SEL",
-            ["SEQ", "Valid.North", "Danger.North", "GoNot.North"],
-            ["SEQ", "Valid.East", "Danger.East", "GoNot.East"],
-            ["SEQ", "Valid.South", "Danger.South", "GoNot.South"],
-            ["SEQ", "Valid.West", "Danger.West", "GoNot.West"],
-            "Go.Random"]
+        # self.genome = ["SEL",
+        #     ["SEQ", "Valid.North", "Danger.North", "GoNot.North"],
+        #     ["SEQ", "Valid.East", "Danger.East", "GoNot.East"],
+        #     ["SEQ", "Valid.South", "Danger.South", "GoNot.South"],
+        #     ["SEQ", "Valid.West", "Danger.West", "GoNot.West"],
+        #     "Go.Random"]
+
+        if genome is None:
+            self.genome = ["SEL", "Go.Stop"]
 
         self.tree = GA_util.parse_node(self.genome, None)
 
+    def copy(self):
+        clone = GAAgent()
+        clone.genome = copy.deepcopy(self.genome)
+        return clone
+
+    def print_genome(self):
+        def print_help(genome, prefix=''):
+            for gene in genome:
+                if isinstance(gene, list):
+                    print_help(gene, prefix+"  ")
+                elif gene in self.legal_composit:
+                    print prefix, gene
+                else:
+                    print prefix+'  ', gene
+
+        print_help(self.genome)
+
+    def mutate(self):
+        """ YOUR CODE HERE! """
     def getAction(self, state):
         action = self.tree(state)
         if action not in state.getLegalPacmanActions():
-            print "Illegal action!!"
+            # print "Illegal action!!"
+            action = 'Stop'
         return action
 
 
