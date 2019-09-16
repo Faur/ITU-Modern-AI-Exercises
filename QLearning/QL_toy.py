@@ -39,7 +39,7 @@ class TabularNStepQLearning:
 
     def update(self, s, a, r, s_, a_, d):
         """ Given (state, action, reward, next_state, next_action, done),
-            update the
+            update the self.Qtable.
         """
         """ YOUR CODE HERE"""
         raise NotImplementedError
