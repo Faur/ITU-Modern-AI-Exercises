@@ -2,10 +2,16 @@ from game import Agent
 from game import Directions
 
 class CompAgent(Agent):
-    """ YOUR CODE HERE! """
+    def __init__(self, **args):
+        Agent.__init__(self, **args)
+
+        """ YOUR CODE HERE! """
+
 
     def getAction(self, state):
         "The agent receives a GameState (defined in pacman.py)."
+
+        """ YOUR CODE HERE! """
         if Directions.WEST in state.getLegalPacmanActions():
             return Directions.WEST
         else:
