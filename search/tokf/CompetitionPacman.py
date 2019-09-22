@@ -5,8 +5,6 @@ class CompAgent(Agent):
     def __init__(self, **args):
         Agent.__init__(self, **args)
 
-        """ YOUR CODE HERE! """
-
 
     def getAction(self, state):
         "The agent receives a GameState (defined in pacman.py)."
