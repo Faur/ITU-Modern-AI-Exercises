@@ -98,10 +98,24 @@ class DQNagent(Agent):
         """ Update the network parameters"""
         s, a, r, s_, a_, d = self.exp[-1]  # CHANGE this for experience replay
 
-        """ YOUR CODE HERE! """
         # Compute our estimate of the Q value, for updating the network
+        """ YOUR CODE HERE! """
+        # The Q-value in state s. Should be a [1, self.num_actions] shaped np.array
+        Q_pred = None
         # Compute the target
+        """ YOUR CODE HERE! """
+        # the target is observed reward + the discounted future reward (Q-value)
+        # NB: at the terminal state, i.e. d==True the target is ONLY the reward.
+        target = None
         # Update the network
+        g_b, g_w = backward_pass(s, target, Q_pred, units, aff,
+                                 self.NN, self.activation_fns, NN_util.squared_error)
+
+        # Stochastic gradient descent
+        for l in range(len(g_b)):
+            self.NN[0][l] -= self.alpha * g_w[l]
+            self.NN[1][l] -= self.alpha * g_b[l]
+
     def terminal_update(self, state):
         s = self.getNetworkInput(state)
         r = self.getReward(state)
@@ -114,7 +128,7 @@ class DQNagent(Agent):
         self.save_weights()
 
         ## Clear everything, ready for next run!
-        ## You will need to change this later
+        ## You will need to change this for experience replay
         """ YOUR CODE HERE! """
         self.prev_state = None
         self.prev_action = None
