@@ -84,10 +84,6 @@ class DQNagent(Agent):
         assert len(self.layers) == len(self.activation_fns) + 1, "Number of layers and activation functions don't match!"
 
         """ DON'T CHANGE THIS PART"""
-        # try:
-        #     # Load weights if they exist
-        #     self.NN = self.load_weights()
-        # except IOError:
         self.NN = init_NN_Glorot(self.layers, self.activation_fns)
 
     def getNetworkInput(self, state):
@@ -114,8 +110,6 @@ class DQNagent(Agent):
 
         self.exp.append([self.prev_state, self.prev_action, r, s, a, d])
 
-        # for i in range(self.n):
-        #     self.updateNetwork(self.n-i, terminal=True)
         self.updateNetwork()
         self.save_weights()
 
@@ -128,9 +122,6 @@ class DQNagent(Agent):
         self.exp = []
 
     def getAction(self, state):
-        """
-        """
-
         s = self.getNetworkInput(state)
         r = self.getReward(state)
 
@@ -144,14 +135,9 @@ class DQNagent(Agent):
             a = np.random.choice(range(self.num_actions))
             if self.verbose:
                 print(s, 'random', self.a_dict[a])
-            # legal_actions = state.getLegalActions()
-            # legal_actions.remove("Stop")
-            # a = self.a_dict[np.random.choice(legal_actions)]
-            # if self.verbose:
-            #     print(s, 'random', self.a_dict[a])
 
         if self.a_dict[a] not in state.getLegalActions():
-            # If illegal action is selected - set a large negative reward
+            # If illegal action is selected - set a negative reward
             # We also force the action to be 'Stop', but we do that in the
             # end of the function.
             r += -10
@@ -192,19 +178,24 @@ if __name__ == '__main__':
 
     > python pacman.py --help
     """
-    args = readCommand(sys.argv[1:])  # Get game components based on input
-
+    args = readCommand( sys.argv[1:] ) # Get game components based on input
     display = copy.deepcopy(args['display'])
     args['display'] = textDisplay.NullGraphics()
 
-    out_rng = []
-    out_rng += runGames(**args)
-    scores = [o.state.getScore() for o in out_rng]
+    out = []
+    for i in range(1000):
+        args['numGames'] = 100
+        args['display'] = textDisplay.NullGraphics()
+        args['pacman'].verbose = False
+        out += runGames( **args )
+
+        args['numGames'] = 1
+        args['display'] = display
+        args['pacman'].verbose = True
+        out += runGames(**args)
+
+    scores = [o.state.getScore() for o in out]
     plt.clf()
     plt.plot(scores)
     plt.show()
-
-    args['numGames'] = 5
-    args['display'] = display
-    runGames(**args)
 
