@@ -96,7 +96,7 @@ class DQNagent(Agent):
 
     def updateNetwork(self):
         """ Update the network parameters"""
-        s, a, r, s_, a_, d = self.exp[-1]
+        s, a, r, s_, a_, d = self.exp[-1]  # CHANGE this for experience replay
 
         """ YOUR CODE HERE! """
         # Compute our estimate of the Q value, for updating the network
