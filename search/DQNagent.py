@@ -53,6 +53,7 @@ def backward_pass(x, t, y, z, a, NN, activations, loss):
     t = t.reshape(BS, -1)
 
     """ YOUR CODE HERE!"""
+
 class DQNagent(Agent):
     def __init__(self, **args):
         """ Initialize the neural network etc."""
@@ -74,13 +75,12 @@ class DQNagent(Agent):
         self.exp = []
 
         """ PLAY AROUND AND CHANGE THIS PART"""
-        self.n = 1  # For n-step returns
-        self.eps = 0.1  # For epsilon greedy action selection.
-        self.alpha = 0.01  # learning rate
+        self.eps = 0.2  # For epsilon greedy action selection.
+        self.alpha = 1e-6  # learning rate
         self.gamma = 0.99  # discount factor
 
-        self.layers = [2, 32, self.num_actions]
-        self.activation_fns = [NN_util.ReLU, NN_util.Linear]
+        self.layers = [2, 256, 256, 256, self.num_actions]
+        self.activation_fns = [NN_util.ReLU, NN_util.ReLU, NN_util.ReLU, NN_util.Linear]
         assert len(self.layers) == len(self.activation_fns) + 1, "Number of layers and activation functions don't match!"
 
         """ DON'T CHANGE THIS PART"""
@@ -90,13 +90,6 @@ class DQNagent(Agent):
         # except IOError:
         self.NN = init_NN_Glorot(self.layers, self.activation_fns)
 
-    def compute_G(self):
-        """ Returns the discounted reward. """
-        G = 0
-        for i in range(self.n):
-            G = G + (self.gamma ** i) * self.exp[i-self.n][2]
-        return G
-
     def getNetworkInput(self, state):
         return np.asarray([state.getPacmanPosition()])
 
@@ -105,22 +98,34 @@ class DQNagent(Agent):
         self.prev_score = state.getScore()
         return r
 
-    def updateNetwork(self, n, terminal=False):
+    def updateNetwork(self):
+        """ Update the network parameters"""
+        s, a, r, s_, a_, d = self.exp[-1]
+
+        """ YOUR CODE HERE! """
+        # Compute our estimate of the Q value, for updating the network
+        # Compute the target
+        # Update the network
     def terminal_update(self, state):
         s = self.getNetworkInput(state)
         r = self.getReward(state)
+        a = None
+        d = True
 
-        for i in range(self.n):
-            self.updateNetwork(self.n-i, terminal=True)
+        self.exp.append([self.prev_state, self.prev_action, r, s, a, d])
 
+        # for i in range(self.n):
+        #     self.updateNetwork(self.n-i, terminal=True)
+        self.updateNetwork()
         self.save_weights()
 
         ## Clear everything, ready for next run!
+        ## You will need to change this later
+        """ YOUR CODE HERE! """
         self.prev_state = None
         self.prev_action = None
         self.prev_score = 0.0
         self.exp = []
-
 
     def getAction(self, state):
         """
@@ -132,31 +137,31 @@ class DQNagent(Agent):
         if np.random.uniform() > self.eps:
             NN_forward = NN_util.forward_pass(s, self.NN, self.activation_fns)
             a = np.argmax(NN_forward[1][-1])
-
-            if self.a_dict[a] not in state.getLegalActions():
-                # If illegal action is selected - set a large negative reward
-                # We also force the action to be 'Stop', but we do that in the
-                # end of the function.
-                r = -50
-                if self.verbose:
-                    print(s, 'illegal', self.a_dict[a], NN_forward[1][-1])
-            else:
-                if self.verbose:
-                    print(s, 'pick', self.a_dict[a], NN_forward[1][-1])
-
+            if self.verbose:
+                print(s, 'pick', self.a_dict[a])
         else:
             # Pick random legal action
-            legal_actions = state.getLegalActions()
-            legal_actions.remove("Stop")
-            a = self.a_dict[np.random.choice(legal_actions)]
+            a = np.random.choice(range(self.num_actions))
             if self.verbose:
                 print(s, 'random', self.a_dict[a])
+            # legal_actions = state.getLegalActions()
+            # legal_actions.remove("Stop")
+            # a = self.a_dict[np.random.choice(legal_actions)]
+            # if self.verbose:
+            #     print(s, 'random', self.a_dict[a])
 
+        if self.a_dict[a] not in state.getLegalActions():
+            # If illegal action is selected - set a large negative reward
+            # We also force the action to be 'Stop', but we do that in the
+            # end of the function.
+            r += -10
+            if self.verbose:
+                print('    ', 'illegal')
 
         if self.prev_state is not None:
-            self.exp.append([self.prev_state, self.prev_action, r, s, a])
-
-            self.updateNetwork(self.n)
+            d = False  # whether or not we are terminal
+            self.exp.append([self.prev_state, self.prev_action, r, s, a, d])
+            self.updateNetwork()
 
         self.prev_state = s
         self.prev_action = a
@@ -175,4 +180,31 @@ class DQNagent(Agent):
         pass
 
 
+from pacman import *
+if __name__ == '__main__':
+    """
+    The main function called when pacman.py is run
+    from the command line:
+
+    > python pacman.py
+
+    See the usage string for more details.
+
+    > python pacman.py --help
+    """
+    args = readCommand(sys.argv[1:])  # Get game components based on input
+
+    display = copy.deepcopy(args['display'])
+    args['display'] = textDisplay.NullGraphics()
+
+    out_rng = []
+    out_rng += runGames(**args)
+    scores = [o.state.getScore() for o in out_rng]
+    plt.clf()
+    plt.plot(scores)
+    plt.show()
+
+    args['numGames'] = 5
+    args['display'] = display
+    runGames(**args)
 
