@@ -716,6 +716,10 @@ class Game:
 
         # inform a learning agent of the game result
         for agentIndex, agent in enumerate(self.agents):
+            if 'terminal_update' in dir(agent):
+                observation = self.state.deepCopy()
+                agent.terminal_update(observation)
+
             if "final" in dir( agent ) :
                 try:
                     self.mute(agentIndex)
