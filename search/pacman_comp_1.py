@@ -18,6 +18,7 @@ students = {
 if __name__ == '__main__':
     args = readCommand( sys.argv[1:] ) # Get game components based on input
     args['display'] = textDisplay.NullGraphics()
+    args['numGames'] = 10
 
     for key in students:
         try:
@@ -31,7 +32,6 @@ if __name__ == '__main__':
         except ImportError as e:
             print('Error with', key)
             print(e)
-
 
 print('')
 print('#'*50)
